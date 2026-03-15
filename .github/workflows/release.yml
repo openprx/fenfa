@@ -12,16 +12,8 @@ env:
   GOPRIVATE: github.com/openprx/*
 
 jobs:
-  build:
+  build-amd64:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-          - goos: linux
-            goarch: arm64
-
     steps:
       - uses: actions/checkout@v4
 
@@ -33,41 +25,71 @@ jobs:
         with:
           go-version: '1.25'
 
+      - name: Install SQLite dev headers
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+
       - name: Build frontend
         run: |
           cd web/front && npm ci && npm run build && cd ../..
           cd web/admin && npm ci && npm run build && cd ../..
 
-      - name: Install cross-compilation dependencies
-        if: matrix.goarch == 'arm64'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-
-      - name: Build binary
+      - name: Build binary (linux/amd64)
         env:
           CGO_ENABLED: 1
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CC: ${{ matrix.goarch == 'arm64' && 'aarch64-linux-gnu-gcc' || 'gcc' }}
+          GOOS: linux
+          GOARCH: amd64
         run: |
           VERSION=${GITHUB_REF_NAME}
           COMMIT=$(git rev-parse --short HEAD)
           go build -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
-            -o fenfa-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/server
-
-      - name: Compress binary
-        run: |
-          tar czf fenfa-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz \
-            fenfa-${{ matrix.goos }}-${{ matrix.goarch }}
+            -o fenfa-linux-amd64 ./cmd/server
+          tar czf fenfa-linux-amd64.tar.gz fenfa-linux-amd64
 
       - uses: actions/upload-artifact@v4
         with:
-          name: fenfa-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: fenfa-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+          name: fenfa-linux-amd64
+          path: fenfa-linux-amd64.tar.gz
+
+  build-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Install SQLite dev headers
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+
+      - name: Build frontend
+        run: |
+          cd web/front && npm ci && npm run build && cd ../..
+          cd web/admin && npm ci && npm run build && cd ../..
+
+      - name: Build binary (linux/arm64)
+        env:
+          CGO_ENABLED: 1
+          GOOS: linux
+          GOARCH: arm64
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          COMMIT=$(git rev-parse --short HEAD)
+          go build -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
+            -o fenfa-linux-arm64 ./cmd/server
+          tar czf fenfa-linux-arm64.tar.gz fenfa-linux-arm64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fenfa-linux-arm64
+          path: fenfa-linux-arm64.tar.gz
 
   release:
-    needs: build
+    needs: [build-amd64, build-arm64]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
