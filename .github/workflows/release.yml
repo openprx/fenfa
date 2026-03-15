@@ -14,18 +14,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-            cc: gcc
-            packages: libsqlite3-dev
-          - goos: linux
-            goarch: arm64
-            cc: aarch64-linux-gnu-gcc
-            packages: gcc-aarch64-linux-gnu libsqlite3-dev:arm64
-
     steps:
       - uses: actions/checkout@v4
 
@@ -37,53 +25,26 @@ jobs:
         with:
           go-version: '1.25'
 
+      - name: Install SQLite headers
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+
       - name: Build frontend
         run: |
           cd web/front && npm ci && npm run build && cd ../..
           cd web/admin && npm ci && npm run build && cd ../..
 
-      - name: Install build dependencies
-        run: |
-          if [ "${{ matrix.goarch }}" = "arm64" ]; then
-            sudo dpkg --add-architecture arm64
-            sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list.d/*.list 2>/dev/null || true
-            echo "deb [arch=arm64] http://ports.ubuntu.com/ $(lsb_release -cs) main restricted universe" | sudo tee /etc/apt/sources.list.d/arm64.list
-            echo "deb [arch=arm64] http://ports.ubuntu.com/ $(lsb_release -cs)-updates main restricted universe" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-          fi
-          sudo apt-get update
-          sudo apt-get install -y ${{ matrix.packages }}
-
-      - name: Build binary
+      - name: Build binary (linux/amd64)
         env:
           CGO_ENABLED: 1
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CC: ${{ matrix.cc }}
         run: |
           VERSION=${GITHUB_REF_NAME}
           COMMIT=$(git rev-parse --short HEAD)
           go build -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
-            -o fenfa-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/server
-
-      - name: Compress binary
-        run: tar czf fenfa-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz fenfa-${{ matrix.goos }}-${{ matrix.goarch }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fenfa-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: fenfa-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
+            -o fenfa-linux-amd64 ./cmd/server
+          tar czf fenfa-linux-amd64.tar.gz fenfa-linux-amd64
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: |
-            fenfa-*.tar.gz
+          files: fenfa-linux-amd64.tar.gz
