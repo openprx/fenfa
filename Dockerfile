@@ -16,7 +16,9 @@ COPY . .
 # Bring in the built frontend artifacts from node-builder stage
 COPY --from=node-builder /src/internal/web/dist /src/internal/web/dist
 # Build server binary
-RUN go build -ldflags="-s -w" -o /out/fenfa ./cmd/server
+ARG VERSION=dev
+ARG COMMIT=none
+RUN go build -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" -o /out/fenfa ./cmd/server
 
 # Runtime image
 FROM alpine:3.22.2

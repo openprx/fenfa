@@ -1,8 +1,12 @@
 .PHONY: build run dev clean front admin test
 
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
+LDFLAGS  = -s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT)
+
 # Build everything
 build: front admin
-	go build -ldflags="-s -w" -o fenfa ./cmd/server
+	go build -ldflags="$(LDFLAGS)" -o fenfa ./cmd/server
 
 # Build frontend only
 front:

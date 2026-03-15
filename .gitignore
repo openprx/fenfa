@@ -55,5 +55,8 @@ config.json
 
 # Claude Code internal
 tasks/
-server
 docs/dev/
+
+# Build output binaries (root only, not cmd/server/)
+/server
+/fenfa
