@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  GOPRIVATE: github.com/openprx/*
+
 jobs:
   build:
     runs-on: ubuntu-latest
