@@ -26,9 +26,8 @@ upload_file() {
     local name=$(basename "$file")
     local size=$(du -h "$file" | cut -f1)
 
-    echo "  上传: $name ($size)"
+    echo "  Uploading: $name ($size)"
 
-    # 构造 curl 参数
     local args=(-s -w "\n%{http_code}" -X POST "$ENDPOINT")
     args+=(-H "X-Auth-Token: $TOKEN")
     args+=(-F "app_file=@$file")
@@ -41,17 +40,16 @@ upload_file() {
     local body=$(echo "$response" | sed '$d')
 
     if [ "$http_code" = "201" ]; then
-        # 提取页面链接
         local page=$(echo "$body" | grep -o '"page":"[^"]*"' | head -1 | cut -d'"' -f4)
-        echo "  完成 -> $page"
+        echo "  Done -> $page"
     else
-        echo "  失败 (HTTP $http_code)"
+        echo "  Failed (HTTP $http_code)"
         echo "$body"
         return 1
     fi
 }
 
-echo "Fenfa 上传 ($ENDPOINT)"
+echo "Fenfa Upload ($ENDPOINT)"
 echo ""
 
 UPLOADED=0
@@ -64,7 +62,7 @@ if [ "$TARGET" = "android" ] || [ "$TARGET" = "all" ]; then
         UPLOADED=$((UPLOADED + 1))
         echo ""
     else
-        echo "[Android] 未找到 APK: $APK"
+        echo "[Android] APK not found: $APK"
         [ "$TARGET" = "android" ] && exit 1
     fi
 fi
@@ -77,14 +75,14 @@ if [ "$TARGET" = "ios" ] || [ "$TARGET" = "all" ]; then
         UPLOADED=$((UPLOADED + 1))
         echo ""
     else
-        echo "[iOS] 未找到 IPA"
+        echo "[iOS] IPA not found"
         [ "$TARGET" = "ios" ] && exit 1
     fi
 fi
 
 if [ "$UPLOADED" -eq 0 ]; then
-    echo "没有找到构建产物，请先运行: bash scripts/build.sh"
+    echo "No build artifacts found. Run your build first."
     exit 1
 fi
 
-echo "上传完成 ($UPLOADED 个文件)"
+echo "Upload complete ($UPLOADED file(s))"
