@@ -56,3 +56,4 @@ config.json
 # Claude Code internal
 tasks/
 server
+docs/dev/
