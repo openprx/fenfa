@@ -59,7 +59,7 @@ docker run -d \
 
 ### 从源码构建
 
-需要：Go 1.23+，Node.js 20+
+需要：Go 1.25+，Node.js 20+
 
 ```bash
 make build   # 构建前端 + 后端

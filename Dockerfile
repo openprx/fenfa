@@ -8,7 +8,7 @@ RUN cd web/front && npm install && npm run build
 RUN cd web/admin && npm install && npm run build
 
 # Go build (needs CGO + sqlite headers)
-FROM golang:1.23-alpine AS go-builder
+FROM golang:1.25-alpine AS go-builder
 RUN apk add --no-cache build-base sqlite-dev
 ENV CGO_ENABLED=1
 WORKDIR /src

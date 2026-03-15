@@ -66,7 +66,7 @@ docker run -d --name fenfa -p 8000:8000 \
 
 ### Build from source
 
-Requirements: Go 1.23+, Node.js 20+
+Requirements: Go 1.25+, Node.js 20+
 
 ```bash
 make build   # builds frontend + backend
