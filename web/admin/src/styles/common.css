@@ -1,0 +1,424 @@
+/* ============================================================
+   COMMON STYLES — shared utilities and patterns
+   ============================================================ */
+
+/* ---- PAGE HEADER ---- */
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ---- CARD ---- */
+
+.card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   BUTTON SYSTEM — 4 tiers: primary / secondary / ghost / text
+   ============================================================ */
+
+/* Shared base for all buttons */
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+/* Tier 1: Primary — main CTA per section */
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--btn-primary-bg-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tier 2: Secondary — alternative actions */
+.btn-secondary {
+  background: var(--bg-hover);
+  color: var(--text-body);
+  border: 1px solid var(--border);
+  padding: 8px 18px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--border);
+  color: var(--text-bright);
+}
+
+/* Tier 3: Ghost — cancel, close, subtle actions */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 8px 18px;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-body);
+  border-color: var(--border-hover);
+}
+
+.btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Small variant */
+.btn-sm {
+  background: var(--bg-hover);
+  color: var(--text-body);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.btn-sm:hover:not(:disabled) {
+  background: var(--border);
+  color: var(--text-bright);
+}
+
+/* ---- FORM ---- */
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-deepest);
+  color: var(--text-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--primary);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ---- TABLE ---- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px;
+  background: var(--bg-deepest);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  padding: 14px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+/* ---- BADGE ---- */
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--badge-bg);
+  color: var(--primary);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   SHARED PATTERNS — modal, dropzone, progress, result banners
+   ============================================================ */
+
+/* ---- MODAL / DIALOG SHELL ---- */
+
+.modal-overlay,
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modal-container,
+.dialog-container {
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--modal-shadow);
+  overflow: hidden;
+  width: 100%;
+}
+
+.modal-header,
+.dialog-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.modal-body,
+.dialog-body {
+  padding: 24px;
+}
+
+.modal-footer,
+.dialog-footer {
+  padding: 16px 24px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid var(--divider);
+}
+
+.modal-title,
+.dialog-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+/* ---- DROPZONE ---- */
+
+.dropzone {
+  border: 2px dashed var(--border-hover);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: var(--bg-deepest);
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+  border-color: var(--purple);
+  background: var(--dropzone-hover-bg);
+  transform: scale(1.02);
+}
+
+.dropzone.has-file {
+  border-color: var(--green);
+  background: var(--green-deep);
+  transform: none;
+  cursor: default;
+}
+
+.dropzone-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.primary-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-bright);
+  margin: 0;
+}
+
+.secondary-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.file-type-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.file-selected {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-bright);
+}
+
+.file-size {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.remove-file-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--red-deep);
+  border: 1px solid var(--red-dark);
+  color: var(--red);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.remove-file-btn:hover {
+  background: var(--red-dark);
+  color: #fff;
+}
+
+/* ---- PROGRESS BAR ---- */
+
+.progress-section {
+  margin-top: 24px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ---- RESULT BANNERS ---- */
+
+.result-section {
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.result-section.success {
+  background: var(--success-bg);
+  border: 1px solid var(--green-dark);
+}
+
+.result-section.error {
+  background: var(--error-bg);
+  border: 1px solid var(--red-dark);
+}
+
+.result-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--green);
+}
+
+.result-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--green-pale);
+}
+
+.result-content a {
+  color: var(--blue);
+}
+
+.error-message {
+  color: var(--red-text);
+  padding: 12px;
+  background: var(--error-msg-bg);
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* Block success/error banners (solid dark bg) */
+.success-banner {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--green-deep);
+  border: 1px solid var(--green-dark);
+  border-radius: 6px;
+  color: var(--green);
+  font-size: 14px;
+}
+
+.error-banner {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--red-deep);
+  border: 1px solid var(--red-dark);
+  border-radius: 6px;
+  color: var(--red);
+  font-size: 14px;
+}

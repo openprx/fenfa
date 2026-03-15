@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Dependencies & caches
+node_modules
+**/node_modules
+**/.vite
+.cache
+
+# Build outputs (rebuilt inside Docker)
+bin
+**/dist/*
+
+# Local runtime data — never bake into image
+data
+uploads
+*.db
+*.sqlite
+*.sqlite3
+
+# Local config & secrets
+config.json
+.env
+.env.*
+
+# OS / Editor
+.DS_Store
+*.log
+*.tar
+
+# Dev docs
+*.md
+!web/front/src/**
+!web/admin/src/**

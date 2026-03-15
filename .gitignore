@@ -1,0 +1,58 @@
+# OS / Editor
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+**/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Go build outputs
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Build artifacts
+dist/
+build/
+coverage/
+internal/web/dist/
+web/front/dist/
+web/admin/dist/
+
+# Go build cache
+.cache/
+
+# Local runtime data
+data/
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+logs/
+
+# Local config / secrets
+config.json
+.env
+.env.local
+.env.*.local
+
+# Docker artifacts
+*.tar
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# Claude Code internal
+tasks/
+server

@@ -1,0 +1,17 @@
+{{ define "app.html" }}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ .Title }}</title>
+  <link rel="stylesheet" href="/static/front/style.css" />
+</head>
+<body>
+  <div id="app">{{ .Message }}</div>
+  <script>window.__APP_DATA__ = {};</script>
+  <script type="module" src="/static/front/app.js"></script>
+</body>
+</html>
+{{ end }}
+

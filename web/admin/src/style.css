@@ -1,0 +1,185 @@
+/* ============================================================
+   DESIGN TOKENS — single source of truth
+   ============================================================ */
+:root {
+  /* 背景 */
+  --bg-deepest:   #0c1222;
+  --bg-card:      #151d2e;
+  --bg-hover:     #1e2a3f;
+
+  /* 边框 */
+  --border:       #243044;
+  --border-hover: #334155;
+
+  /* 文字 */
+  --text-bright:    #f0f4f8;
+  --text-body:      #c9d5e3;
+  --text-secondary: #8fa3ba;
+  --text-muted:     #6b7f96;
+  --text-dim:       #4a5c72;
+
+  /* 主色：靛青蓝 */
+  --primary:       #6366f1;
+  --primary-hover: #5457e5;
+  --primary-deep:  #1e1b4b;
+
+  /* 蓝色 */
+  --blue:        #60a5fa;
+  --blue-dark:   #3b82f6;
+  --blue-light:  #93c5fd;
+  --blue-pale:   #bfdbfe;
+  --blue-deep:   #172554;
+
+  /* 紫色 */
+  --purple:       #8b5cf6;
+  --purple-dark:  #6366f1;
+  --purple-alt:   #7c3aed;
+  --purple-light: #a78bfa;
+  --purple-deep:  #1e1b4b;
+
+  /* 绿色 */
+  --green:      #34d399;
+  --green-dark: #10b981;
+  --green-deep: #052e1f;
+  --green-pale: #d1fae5;
+
+  /* 红色 */
+  --red:      #f87171;
+  --red-dark: #ef4444;
+  --red-deep: #2d1215;
+  --red-text: #fca5a5;
+
+  /* 橙色 */
+  --orange:      #fb923c;
+  --orange-dark: #f97316;
+  --orange-deep: #2d1a06;
+
+  /* 按钮 */
+  --btn-primary-bg:       #6366f1;
+  --btn-primary-bg-hover: #5457e5;
+
+  /* 语义/半透明 */
+  --overlay-bg:        rgba(0, 0, 0, 0.6);
+  --card-shadow:       0 1px 3px rgba(0, 0, 0, 0.3);
+  --modal-shadow:      0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --divider:           rgba(255, 255, 255, 0.06);
+  --badge-bg:          rgba(99, 102, 241, 0.12);
+  --success-bg:        rgba(52, 211, 153, 0.08);
+  --error-bg:          rgba(248, 113, 113, 0.08);
+  --error-msg-bg:      rgba(248, 113, 113, 0.06);
+  --dropzone-hover-bg: rgba(139, 92, 246, 0.06);
+  --toast-shadow:      0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================
+   LIGHT THEME
+   ============================================================ */
+[data-theme="light"] {
+  /* 背景 */
+  --bg-deepest:   #f3f4f6;
+  --bg-card:      #ffffff;
+  --bg-hover:     #f0f0f5;
+
+  /* 边框 */
+  --border:       #e0e4ea;
+  --border-hover: #c5cad3;
+
+  /* 文字 */
+  --text-bright:    #111827;
+  --text-body:      #374151;
+  --text-secondary: #6b7280;
+  --text-muted:     #9ca3af;
+  --text-dim:       #c0c7d0;
+
+  /* 主色 */
+  --primary:       #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-deep:  #eef2ff;
+
+  /* 蓝色 */
+  --blue:        #3b82f6;
+  --blue-dark:   #2563eb;
+  --blue-light:  #3b82f6;
+  --blue-pale:   #1d4ed8;
+  --blue-deep:   #eff6ff;
+
+  /* 紫色 */
+  --purple:       #7c3aed;
+  --purple-dark:  #6366f1;
+  --purple-light: #8b5cf6;
+  --purple-deep:  #f5f3ff;
+
+  /* 绿色 */
+  --green:      #059669;
+  --green-dark: #047857;
+  --green-deep: #ecfdf5;
+  --green-pale: #065f46;
+
+  /* 红色 */
+  --red:      #dc2626;
+  --red-dark: #b91c1c;
+  --red-deep: #fef2f2;
+  --red-text: #991b1b;
+
+  /* 橙色 */
+  --orange:      #ea580c;
+  --orange-dark: #c2410c;
+  --orange-deep: #fff7ed;
+
+  /* 按钮 */
+  --btn-primary-bg:       #4f46e5;
+  --btn-primary-bg-hover: #4338ca;
+
+  /* 语义/半透明 */
+  --overlay-bg:        rgba(0, 0, 0, 0.3);
+  --card-shadow:       0 1px 3px rgba(0, 0, 0, 0.06);
+  --modal-shadow:      0 20px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --divider:           rgba(0, 0, 0, 0.06);
+  --badge-bg:          rgba(79, 70, 229, 0.08);
+  --success-bg:        #ecfdf5;
+  --error-bg:          #fef2f2;
+  --error-msg-bg:      #fef2f2;
+  --dropzone-hover-bg: #f5f3ff;
+  --toast-shadow:      0 10px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-deepest);
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--blue-light);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-card);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}

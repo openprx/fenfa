@@ -1,0 +1,21 @@
+{
+  "server": {
+    "port": "8000",
+    "primary_domain": "https://dist.example.com",
+    "secondary_domains": [
+      "https://cdn1.example.com",
+      "https://cdn2.example.com"
+    ],
+    "organization": "Your Company Name",
+    "bundle_id_prefix": "com.yourcompany.fenfa",
+    "data_dir": "data",
+    "db_path": "data/fenfa.db",
+    "dev_proxy_front": "",
+    "dev_proxy_admin": ""
+  },
+  "auth": {
+    "upload_tokens": ["dev-upload-token"],
+    "admin_tokens": ["dev-admin-token"]
+  }
+}
+
