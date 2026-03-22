@@ -137,6 +137,11 @@ Auth via `X-Auth-Token` header. See [`docs/api-spec.md`](docs/api-spec.md) for d
 | POST | `/upload` | upload | Upload a build |
 | * | `/admin/api/*` | admin | Admin API |
 
+## Links
+
+- [Documentation](https://docs.openprx.dev/en/fenfa/) — Full documentation (10 languages)
+- [Community](https://community.openprx.dev) — OpenPRX community forum
+
 ## Contributing
 
 Fenfa is part of [OpenPRX](https://github.com/openprx). Issues and pull requests welcome.
