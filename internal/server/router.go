@@ -1,83 +1,133 @@
 package server
 
 import (
-	"crypto/rand"
-	"encoding/hex"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/openprx/fenfa/internal/config"
 	"gorm.io/gorm"
+
+	"github.com/openprx/fenfa/internal/config"
+	"github.com/openprx/fenfa/internal/server/handlers"
+	"github.com/openprx/fenfa/internal/server/middleware"
 )
 
-// RegisterRoutes wires all HTTP routes into the Gin engine.
 func RegisterRoutes(g *gin.Engine, db *gorm.DB, cfg *config.Config) {
-	// Health check
-	g.GET("/healthz", func(c *gin.Context) { ok(c, gin.H{"status": "ok"}) })
+	// Static served in main, still ok to keep here if needed
+	g.GET("/healthz", handlers.Healthz(db))
 
-	// Public routes
-	g.GET("/products/:slug", handleProductPage(db, cfg))
-	g.GET("/d/:releaseID", handleDownload(db, cfg))
-	g.GET("/manifest/:releaseID", handleManifest(db, cfg))
+	// Public HTML + JSON
+	g.GET("/apps/:appID", func(c *gin.Context) {
+		handlers.LegacyAppRedirect(db)(c)
+	})
+	g.GET("/products/:productID", func(c *gin.Context) {
+		if cfg.Server.DevProxyFront != "" {
+			target := cfg.Server.DevProxyFront + c.Request.URL.Path
+			if q := c.Request.URL.RawQuery; q != "" {
+				target += "?" + q
+			}
+			c.Redirect(http.StatusTemporaryRedirect, target)
+			return
+		}
+		handlers.ProductDetail(db)(c)
+	})
+	g.GET("/api/apps/:appID", handlers.AppDetailJSON(db, cfg))
+	g.GET("/api/products/:productID", handlers.ProductDetailJSON(db, cfg))
+	g.GET("/api/products/slug/:slug", handlers.ProductDetailJSON(db, cfg))
+	g.GET("/icon/:appID", handlers.AppIcon(db))
+	g.GET("/icon/products/:productID", handlers.ProductIcon(db))
 
-	// UDID enrollment
-	g.GET("/udid/enroll/:nonce", handleUDIDEnroll(db, cfg))
-	g.POST("/udid/callback", handleUDIDCallback(db, cfg))
+	g.GET("/ios/:releaseID/manifest.plist", handlers.IOSManifest(db, cfg))
+	g.GET("/d/:releaseID", handlers.Download(db))
 
-	// Upload (requires upload or admin token)
-	g.POST("/upload", authMiddleware(cfg, "upload"), handleUpload(db, cfg))
+	// Public event ingestion (client-side)
+	g.POST("/events", handlers.PostEvent(db))
 
-	// Admin API
-	admin := g.Group("/admin/api", authMiddleware(cfg, "admin"))
-	{
-		// Upload config
-		admin.GET("/upload-config", handleUploadConfig(cfg))
+	// UDID endpoints
+	g.GET("/udid/profile.mobileconfig", handlers.UDIDProfile(db, cfg))
+	g.POST("/udid/callback", handlers.UDIDCallback(db, cfg))
+	g.GET("/udid/status", handlers.UDIDStatus(db))
 
-		// Parse app metadata
-		admin.POST("/parse-app", handleParseApp())
+	// Upload (auth required, with CORS for cross-domain uploads)
+	upload := g.Group("/")
+	upload.Use(func(c *gin.Context) {
+		// Allow cross-origin uploads when upload_domain is configured
+		origin := c.GetHeader("Origin")
+		if origin != "" {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Auth-Token")
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		}
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	})
+	upload.OPTIONS("/upload", func(c *gin.Context) { c.Status(204) })
+	upload.POST("/upload", middleware.RequireToken(cfg, "upload"), handlers.Upload(db, cfg))
+	upload.OPTIONS("/smart-upload", func(c *gin.Context) { c.Status(204) })
+	upload.POST("/smart-upload", middleware.RequireToken(cfg, "upload"), handlers.SmartUpload(db, cfg))
+	upload.OPTIONS("/admin/api/parse-app", func(c *gin.Context) { c.Status(204) })
+	upload.POST("/admin/api/parse-app", middleware.RequireToken(cfg, "admin"), handlers.ParseAppInfo())
 
-		// Products
-		admin.GET("/products", handleListProducts(db))
-		admin.GET("/products/:id", handleGetProduct(db))
-		admin.POST("/products", handleCreateProduct(db))
-		admin.PUT("/products/:id", handleUpdateProduct(db))
-		admin.DELETE("/products/:id", handleDeleteProduct(db))
+	// Admin APIs
+	admin := g.Group("/admin")
+	admin.Use(middleware.RequireToken(cfg, "admin"))
+	// JSON
+	admin.GET("/api/events", handlers.AdminListEvents(db))
+	admin.GET("/api/ios_devices", handlers.AdminListIOSDevices(db))
+	admin.GET("/api/ios_variants", handlers.AdminListIOSVariants(db))
+	// Exports
 
-		// Variants
-		admin.POST("/products/:id/variants", handleCreateVariant(db))
-		admin.PUT("/variants/:id", handleUpdateVariant(db))
-		admin.DELETE("/variants/:id", handleDeleteVariant(db))
+	// List apps
+	admin.GET("/api/apps", handlers.AdminListApps(db))
+	// Get single app with releases and provisioning profiles
+		admin.GET("/api/apps/:appID", handlers.AdminGetApp(db))
+		admin.GET("/api/products", handlers.AdminListProducts(db))
+		admin.POST("/api/products", handlers.AdminCreateProduct(db))
+		admin.GET("/api/products/:productID", handlers.AdminGetProduct(db))
+		admin.PUT("/api/products/:productID", handlers.AdminUpdateProduct(db))
+		admin.POST("/api/products/:productID/variants", handlers.AdminCreateVariant(db))
+		admin.GET("/api/variants/:variantID/stats", handlers.AdminGetVariantStats(db))
+		admin.PUT("/api/variants/:variantID", handlers.AdminUpdateVariant(db))
+		admin.DELETE("/api/products/:productID", handlers.AdminDeleteProduct(db))
+		admin.DELETE("/api/variants/:variantID", handlers.AdminDeleteVariant(db))
+		admin.DELETE("/api/releases/:releaseID", handlers.AdminDeleteRelease(db))
 
-		// Settings
-		admin.GET("/settings", handleGetSettings(db))
-		admin.PUT("/settings", handleUpdateSettings(db))
+	// App publish/unpublish
+	admin.PUT("/api/apps/:appID/publish", handlers.PublishApp(db))
+	admin.PUT("/api/apps/:appID/unpublish", handlers.UnpublishApp(db))
 
-		// Events & Stats
-		admin.GET("/events", handleListEvents(db))
-		admin.GET("/variants/:id/stats", handleVariantStats(db))
+	// System settings
+	admin.GET("/api/settings", handlers.GetSystemSettings(db))
+	admin.PUT("/api/settings", handlers.UpdateSystemSettings(db))
 
-		// iOS devices
-		admin.GET("/ios_variants", handleListIOSVariants(db))
-		admin.GET("/ios_devices", handleListIOSDevices(db))
+	// Upload config (for frontend to know upload endpoint)
+	admin.GET("/api/upload-config", handlers.GetUploadConfig(db))
 
-		// Apple device registration
-		admin.GET("/apple/status", handleAppleStatus(db))
-		admin.POST("/devices/:id/register-apple", handleRegisterApple(db))
-		admin.POST("/devices/register-apple", handleBatchRegisterApple(db))
-	}
+	// Apple Developer Portal integration
+	admin.GET("/api/apple/status", handlers.AppleStatus(db))
+	admin.GET("/api/apple/devices", handlers.AppleListDevices(db))
+	admin.POST("/api/devices/:id/register-apple", handlers.RegisterDeviceToApple(db))
+	admin.POST("/api/devices/register-apple", handlers.BatchRegisterDevicesToApple(db))
 
-	// Admin exports
-	exports := g.Group("/admin/exports", authMiddleware(cfg, "admin"))
-	{
-		exports.GET("/releases.csv", handleExportReleases(db))
-		exports.GET("/events.csv", handleExportEvents(db))
-		exports.GET("/ios_devices.csv", handleExportIOSDevices(db))
-	}
-}
+	admin.GET("/exports/releases.csv", handlers.ExportReleases(db))
+	admin.GET("/exports/events.csv", handlers.ExportEvents(db))
+	admin.GET("/exports/ios_devices.csv", handlers.ExportIOSDevices(db))
 
-func newID(prefix string) string {
-	buf := make([]byte, 5)
-	if _, err := rand.Read(buf); err != nil {
-		return prefix + "00000"
-	}
-	return prefix + hex.EncodeToString(buf)[:8]
+	// Template test route
+	g.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "app.html", gin.H{"Title": "fenfa", "Message": "It works"})
+	})
+
+	// Admin HTML page (public page; exports under /admin/exports require token)
+	g.GET("/admin", func(c *gin.Context) {
+		if cfg.Server.DevProxyAdmin != "" {
+			target := cfg.Server.DevProxyAdmin + "/"
+			c.Redirect(http.StatusTemporaryRedirect, target)
+			return
+		}
+		c.HTML(http.StatusOK, "admin.html", gin.H{"Title": "Modern distribution"})
+	})
 }
