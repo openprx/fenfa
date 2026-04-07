@@ -54,9 +54,16 @@ func IOSManifest(db *gorm.DB, cfg *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		// iOS manifest should only be accessible from iOS devices
-		ua := c.Request.UserAgent()
-		if !isPlatformCompatible("ios", ua) {
+		// iOS manifest must be accessible from iOS system services (itms-services)
+		// which use Darwin/CFNetwork user agents, not Safari-style UAs.
+		ua := strings.ToLower(c.Request.UserAgent())
+		isIOS := strings.Contains(ua, "iphone") ||
+			strings.Contains(ua, "ipad") ||
+			strings.Contains(ua, "ipod") ||
+			strings.Contains(ua, "darwin") ||
+			strings.Contains(ua, "cfnetwork") ||
+			strings.Contains(ua, "appstored")
+		if !isIOS {
 			c.String(http.StatusForbidden, "This app is only available on iOS devices")
 			return
 		}
@@ -76,8 +83,17 @@ func IOSManifest(db *gorm.DB, cfg *config.Config) gin.HandlerFunc {
 		if rel.Build > 0 && ver != "" {
 			ver = fmt.Sprintf("%s (%d)", rel.Version, rel.Build)
 		}
+		// Resolve bundle identifier: prefer variant, fallback to release's provisioning profile
+		bundleID := ctx.Variant.Identifier
+		if bundleID == "" {
+			var pp store.ProvisioningProfile
+			if err := db.Where("release_id = ?", rel.ID).First(&pp).Error; err == nil {
+				bundleID = pp.BundleID
+			}
+		}
+
 		c.Header("Content-Type", "application/xml")
-		c.String(http.StatusOK, plistTemplate(dl, ctx.Variant.Identifier, ver, ctx.Product.Name))
+		c.String(http.StatusOK, plistTemplate(dl, bundleID, ver, ctx.Product.Name))
 	}
 }
 
